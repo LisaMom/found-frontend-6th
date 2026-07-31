@@ -4,10 +4,9 @@ import {
   DisclosurePanel,
   Menu,
   MenuButton,
-  MenuItem,
-  MenuItems,
 } from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useAppSelector } from "../../lib/hook";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true },
@@ -21,6 +20,7 @@ function classNames(...classes) {
 
 export default function NavbarComponent() {
   const isLogined = false;
+  const count = useAppSelector((state) => state.cart.totalItems)
   return (
     <Disclosure as="nav" className="relative bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -71,14 +71,21 @@ export default function NavbarComponent() {
             </div>
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <button
+            {/* <button
               type="button"
               className="relative rounded-full p-1 text-gray-400 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
             >
               <span className="absolute -inset-1.5" />
               <span className="sr-only">View notifications</span>
               <BellIcon aria-hidden="true" className="size-6" />
+            </button> */}
+            <button>
+              <a href="#" className="cart-icon">
+                <i>🛒</i>
+                <span className="bg-red-500 text-white p-2 rounded-full">{count}</span>
+              </a>
             </button>
+
 
             {/* Profile dropdown */}
             <Menu as="div" className="relative ml-3">
@@ -93,7 +100,7 @@ export default function NavbarComponent() {
                   />
                 ) : (
                   <a
-                    class="px-6 py-2 min-w-[120px] text-center text-gray-200 border "
+                    className="px-6 py-2 min-w-[120px] text-center text-gray-200 border "
                     href="/auth/register"
                   >
                     Get Start

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import ProductDetailComponent from "../components/products/ProductDetailComponent";
+import RTKProductComponent from "../components/products/RTKProductComponent";
 
 export default function Product() {
   const [detailProduct, setDetailProduct] = useState({});
@@ -22,11 +23,16 @@ export default function Product() {
 
   const { name, description, thumbnail, priceOut } = detailProduct;
   return (
-    <ProductDetailComponent
+   <section>
+    {/*RTK CRUD */}
+    <RTKProductComponent/>
+    
+     <ProductDetailComponent
       title={name}
       description={description}
       thumbnail={thumbnail}
       price={priceOut}
     />
+   </section>
   );
 }

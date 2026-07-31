@@ -1,30 +1,27 @@
-import { useEffect, useState } from "react";
 import "./App.css";
-import CounterComponent from "./components/CounterComponent";
-import ProductCardComponent from "./components/hooks/ProductCardComponent";
-import FooterComponent from "./components/nav-footer/FooterComponent";
-import NavbarComponent from "./components/nav-footer/NavbarComponent";
-import { UserComponent } from "./components/UserComponent";
 // import ProductComponent from './components/products/ProductComponent'
 import { Suspense, lazy } from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import LoadingComponent from "./components/LoadingComponent";
 import { Link } from "react-router";
+import { useGetAllProductsQuery } from "./services/ecommerceApi";
 
 function App() {
-  const [products, setProducts] = useState([]);
-  useEffect(() => {
-   const loader = async() => {
-    const response = await fetch(
-      `${import.meta.env.VITE_BASE_ISHOP_URL}/products`,
-    );
-    const result = await response.json();
-    setProducts(result?.content);
+  // const [products, setProducts] = useState([]);
+  // useEffect(() => {
+  //  const loader = async() => {
+  //   const response = await fetch(
+  //     `${import.meta.env.VITE_BASE_ISHOP_URL}/products`,
+  //   );
+  //   const result = await response.json();
+  //   setProducts(result?.content);
 
-   }
-   loader()
+  //  }
+  //  loader()
     
-  }, []);
+  // }, []);
+
+  // calling get all products hook
+  const {data:products, isLoading, error} = useGetAllProductsQuery();
 
   const ProductComponent = lazy(
     () => import("./components/products/ProductComponent"),
@@ -39,7 +36,9 @@ function App() {
 
         {/* add loading */}
         <Suspense fallback={<LoadingComponent />}>
-          {products.map(({ uuid, name, priceOut, thumbnail, category }) => (
+          {isLoading && <LoadingComponent />}
+          {error && <p>Failed to load products.</p>}
+          {(products ?? []).map(({ uuid, name, priceOut, thumbnail, category }) => (
             <Link  key={uuid} to={`/product/${uuid}`}>
               <ProductComponent
                 title={name}

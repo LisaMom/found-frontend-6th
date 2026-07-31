@@ -1,5 +1,3 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
@@ -14,6 +12,8 @@ import Layout from "./Layout.jsx";
 import AuthLayout from "./layout/AuthLayout.jsx";
 import LoginComponent from "./components/auth/LoginComponent.jsx";
 import RegisterComponent from "./components/auth/RegisterComponent.jsx";
+import { Provider } from "react-redux";
+import { store } from "./lib/store";
 
 const router = createBrowserRouter([
   // dashboardlayout
@@ -78,4 +78,8 @@ const router = createBrowserRouter([
 
 const root = document.getElementById("root");
 
-ReactDOM.createRoot(root).render(<RouterProvider router={router} />);
+ReactDOM.createRoot(root).render(
+  <Provider store={store}>
+    <RouterProvider router={router} />
+  </Provider>
+);
