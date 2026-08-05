@@ -1,22 +1,81 @@
-
-
+import { useForm } from "react-hook-form"
+import { useUserLoginMutation } from "../../services/authApi";
+import { useNavigate } from "react-router";
+import z from "zod";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast, ToastContainer } from "react-toastify";
 
 export default function LoginComponent() {
+  const [loginRequest] = useUserLoginMutation();
+  const navigate = useNavigate();
+
+  const formSchema = z.object({
+    email: z
+      .string("Please input email")
+      .email({pattern: z.regexes.html5Email }),
+    password: z.string()
+      .min(6, "Atleast 6 letters")
+      .max(100, "Atmost 100 letter ")
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+      .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" })
+  })
+
+ // define useForm
+const {register, handleSubmit, watch, formState:{errors}} = useForm({
+  resolver: zodResolver(formSchema),
+  defaultValues: {
+    email: '',
+    password: ''
+  }
+})
+
+
+  // custom login logic
+  const handleLoginSubmit = async(data) => {
+    try{
+      const result = await loginRequest({
+        userLoginRequest: data
+      });
+      if(result?.data?.accessToken){
+        toast.success("You have login successfully!")
+       setTimeout(()=> {
+         navigate("/",{replace: true})
+       },5000)
+      }else{
+        toast.error("Incorrect email or password!")
+      }
+    }catch(error){
+      console.log(error)
+    }
+  }
+}
+
   return (
     <section className="bg-gray-100 min-h-screen flex box-border justify-center items-center">
+      <ToastContainer/>
   <div className=" rounded-2xl flex max-w-3xl p-5 items-center">
     <div className="md:w-1/2 px-8">
       <h2 className="font-bold text-3xl text-[#002D74]">Login</h2>
       <p className="text-sm mt-4 text-[#002D74]">
         If you already a member, easily log in now.
       </p>
-      <form action="" className="flex flex-col gap-4">
+      <form action="" 
+      onClick={handleSubmit(handleLoginSubmit)}
+      className="flex flex-col gap-4">
         <input
           className="p-2 mt-8 rounded-xl border"
           type="email"
           name="email"
           placeholder="Email"
+          {...register("email")}
         />
+        {/* validation input form from react hook form */}
+        {/* <p className="text-red-500">{errors?.email && errors.email.message}</p> */}
+        {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
+
         <div className="relative">
           <input
             className="p-2 rounded-xl border w-full"
@@ -24,7 +83,11 @@ export default function LoginComponent() {
             name="password"
             id="password"
             placeholder="Password"
+            {...register("password")}
           />
+          {/* validation input form from react hook form */}
+<p className="text-red-500">{errors?.password && errors.passowrd?.message}</p>
+
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={16}
@@ -109,4 +172,3 @@ export default function LoginComponent() {
 </section>
 
   )
-}
