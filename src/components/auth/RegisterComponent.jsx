@@ -1,213 +1,151 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useUserRegisterMutation } from "../../services/authApi";
+
+// Fixed values matching the teacher's example — not collected from the user
+const FIXED_ADDRESS = {
+  addressLine1: "pp",
+  addressLine2: "pp",
+  road: "2",
+  linkAddress: "R2",
+};
+const FIXED_PROFILE = "https://i.pinimg.com/originals/82/47/0b/82470b4ed44c3edacfcd4201e2297050.jpg?nii=t";
 
 export default function RegisterComponent() {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const navigate = useNavigate();
+  const [registerRequest] = useUserRegisterMutation();
+
+  const formSchema = z.object({
+    username: z
+      .string("Please input username")
+      .min(3, "Username must be at least 3 characters")
+      .max(50, "Username must be at most 50 characters"),
+    email: z
+      .string("Please input email")
+      .email({ pattern: z.regexes.html5Email }),
+    phoneNumber: z
+      .string("Please input phone number")
+      .min(8, "Phone number is too short")
+      .max(20, "Phone number is too long")
+      .regex(/^[0-9+\s-]+$/, { message: "Phone number can only contain digits, spaces, + and -" }),
+    password: z.string()
+      .min(6, "Atleast 6 letters")
+      .max(100, "Atmost 100 letter ")
+      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
+      .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
+    confirmPassword: z.string("Please confirm your password"),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [serverError, setServerError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // clear the field-specific error as the user types
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
+  // define useForm
+  const { register, handleSubmit,
+    formState: { errors } } = useForm({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+        username: '',
+        email: '',
+        phoneNumber: '',
+        password: '',
+        confirmPassword: ''
+      }
+    })
 
-  const validate = () => {
-    const newErrors = {};
+  // custom register logic
+  const handleRegisterSubmit = async (data) => {
+    const userRegisterRequest = {
+      username: data.username,
+      phoneNumber: data.phoneNumber,
+      address: FIXED_ADDRESS,
+      email: data.email,
+      password: data.password,
+      confirmPassword: data.confirmPassword,
+      profile: FIXED_PROFILE,
+    };
 
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.trim().length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Enter a valid email address";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    }
-
-    if (formData.confirmPassword !== formData.password) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-
-    return newErrors;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setServerError("");
-    setSuccess(false);
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    const result = await registerRequest({ userRegisterRequest });
+    if (result.error) {
+      console.log("Register failed:", result.error);
       return;
     }
-
-    setIsSubmitting(true);
-    try {
-      // Replace this URL with your actual backend register endpoint
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed. Please try again.");
-      }
-
-      // Backend auto-logs-in on register and returns an access token.
-      // Adjust the field name below to match whatever your Swagger response
-      // actually uses (accessToken / token / jwt, etc).
-      const accessToken = data.accessToken || data.token || data.jwt;
-      if (accessToken) {
-        localStorage.setItem("accessToken", accessToken);
-      }
-      if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-
-      setSuccess(true);
-      setFormData({ username: "", email: "", password: "", confirmPassword: "" });
-      // Example redirect after successful register + auto-login:
-      // window.location.href = "/dashboard";
-    } catch (err) {
-      setServerError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // registration succeeded — send them to login to sign in with their new account
+    navigate("/auth/login", { replace: true });
   };
 
-  const handleGoogleRegister = () => {
-    // Redirect to your backend's Google OAuth start route
-    window.location.href = "/api/auth/google";
-  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-white">
       <div className="w-full flex items-center justify-center">
         <div className="w-3/4 max-w-md p-8 bg-white shadow-lg rounded-lg">
           <h2 className="text-2xl font-bold text-blue-600 mb-6">Register</h2>
-
-          {success && (
-            <div className="mb-4 p-3 bg-green-50 text-green-700 text-sm rounded-lg">
-              Account created successfully!
-            </div>
-          )}
-
-          {serverError && (
-            <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg">
-              {serverError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} noValidate>
+          <form onSubmit={handleSubmit(handleRegisterSubmit)}>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm mb-2">Username</label>
               <input
                 type="text"
-                name="username"
                 placeholder="Enter your username"
-                value={formData.username}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.username ? "border-red-500" : ""
-                }`}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("username")}
               />
-              {errors.username && (
-                <p className="text-red-500 text-xs mt-1">{errors.username}</p>
-              )}
+              <p className="text-red-500 text-sm mt-1">{errors?.username && errors.username.message}</p>
             </div>
-
             <div className="mb-4">
               <label className="block text-gray-700 text-sm mb-2">Email</label>
               <input
                 type="email"
-                name="email"
                 placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? "border-red-500" : ""
-                }`}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("email")}
               />
-              {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-              )}
+              <p className="text-red-500 text-sm mt-1">{errors?.email && errors.email.message}</p>
             </div>
-
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm mb-2">Phone Number</label>
+              <input
+                type="tel"
+                placeholder="Enter your phone number"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("phoneNumber")}
+              />
+              <p className="text-red-500 text-sm mt-1">{errors?.phoneNumber && errors.phoneNumber.message}</p>
+            </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm mb-2">Password</label>
               <input
                 type="password"
-                name="password"
                 placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.password ? "border-red-500" : ""
-                }`}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("password")}
               />
-              {errors.password && (
-                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-              )}
+              <p className="text-red-500 text-sm mt-1">{errors?.password && errors.password.message}</p>
             </div>
-
             <div className="mb-6">
               <label className="block text-gray-700 text-sm mb-2">
                 Confirm Password
               </label>
               <input
                 type="password"
-                name="confirmPassword"
                 placeholder="Confirm your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.confirmPassword ? "border-red-500" : ""
-                }`}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("confirmPassword")}
               />
-              {errors.confirmPassword && (
-                <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-              )}
+              <p className="text-red-500 text-sm mt-1">{errors?.confirmPassword && errors.confirmPassword.message}</p>
             </div>
-
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
             >
-              {isSubmitting ? "Signing up..." : "Sign up"}
+              Sign up
             </button>
           </form>
 
-          <button
-            onClick={handleGoogleRegister}
-            className="w-full mt-4 border border-gray-300 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition"
-          >
+
+          <button className="w-full mt-4 border border-gray-300 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition">
             <img
               src="https://www.svgrepo.com/show/355037/google.svg"
               alt="Google"
@@ -215,9 +153,8 @@ export default function RegisterComponent() {
             />
             Register with Google
           </button>
-
           <p className="mt-6 text-sm text-center text-gray-600">
-            Already have an account?{" "}
+            Already have an account?
             <a href="/auth/login" className="text-blue-600 hover:underline">
               Login
             </a>
@@ -225,5 +162,5 @@ export default function RegisterComponent() {
         </div>
       </div>
     </div>
-  );
+  )
 }

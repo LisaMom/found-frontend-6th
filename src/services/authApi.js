@@ -12,7 +12,7 @@ export const authApi = baseApi.injectEndpoints({
 
     userRegister: builder.mutation({
       query: ({userRegisterRequest}) => ({
-        url: '/users/user-signup',
+        url: '/users/user-signup?emailVerified=true',
         method: 'POST',
         body: userRegisterRequest
       })

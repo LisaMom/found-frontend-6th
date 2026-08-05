@@ -1,99 +1,201 @@
 
+// import {Avatar, Button, Checkbox, Chip, Table} from "@heroui/react";
+// import {Icon} from "@iconify/react";
+// import {useMemo, useState} from "react";
 
-import React, { useMemo, useState } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-} from '@tanstack/react-table';
+// const user = {
+//   id: null,
+//   name: "",
+//   image_url: "",
+//   role: "",
+//   status: "",
+//   email: ""
+// };
 
-function ProductTableComponent() {
-  const [data] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', age: 28, city: 'New York' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 32, city: 'London' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', age: 45, city: 'Paris' },
-    { id: 4, name: 'Alice Williams', email: 'alice@example.com', age: 29, city: 'Tokyo' }
-  ]);
+// const statusColorMap = {
+//   Active: "success",
+//   Inactive: "danger",
+//   "On Leave": "warning",
+// };
 
-  const columns = useMemo(() => [
-    {
-      accessorKey: 'id',
-      header: 'ID',
-    },
-    {
-      accessorKey: 'name',
-      header: 'Name',
-    },
-    {
-      accessorKey: 'email',
-      header: 'Email',
-    },
-    {
-      accessorKey: 'age',
-      header: 'Age',
-    },
-    {
-      accessorKey: 'city',
-      header: 'City',
-    },
-  ], []);
+// const users: User[] = [
+//   {
+//     email: "kate@acme.com",
+//     id: 4586932,
+//     image_url: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg",
+//     name: "Kate Moore",
+//     role: "Chief Executive Officer",
+//     status: "Active",
+//   },
+//   {
+//     email: "john@acme.com",
+//     id: 5273849,
+//     image_url: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/green.jpg",
+//     name: "John Smith",
+//     role: "Chief Technology Officer",
+//     status: "Active",
+//   },
+//   {
+//     email: "sara@acme.com",
+//     id: 7492836,
+//     image_url: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg",
+//     name: "Sara Johnson",
+//     role: "Chief Marketing Officer",
+//     status: "On Leave",
+//   },
+//   {
+//     email: "michael@acme.com",
+//     id: 8293746,
+//     image_url: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg",
+//     name: "Michael Brown",
+//     role: "Chief Financial Officer",
+//     status: "Active",
+//   },
+//   {
+//     email: "emily@acme.com",
+//     id: 1234567,
+//     image_url: "https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/orange.jpg",
+//     name: "Emily Davis",
+//     role: "Product Manager",
+//     status: "Inactive",
+//   },
+// ];
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  });
+// export function ProductTableComponent() {
+//   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set());
+//   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor>({
+//     column: "name",
+//     direction: "ascending",
+//   });
 
-  return (
-    <div style={{ padding: '20px' }}>
-      <h2>Employee Directory</h2>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <th
-                  key={header.id}
-                  style={{
-                    padding: '12px',
-                    textAlign: 'left',
-                    borderBottom: '2px solid #ddd',
-                    cursor: header.column.getCanSort() ? 'pointer' : 'default',
-                    userSelect: 'none'
-                  }}
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                  {{
-                    asc: ' ↑',
-                    desc: ' ↓',
-                  }[header.column.getIsSorted()] ?? null}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map(row => (
-            <tr key={row.id} style={{ borderBottom: '1px solid #eee' }}>
-              {row.getVisibleCells().map(cell => (
-                <td key={cell.id} style={{ padding: '12px' }}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+//   const sortedUsers = useMemo(() => {
+//     return [...users].sort((a, b) => {
+//       const col = sortDescriptor.column as keyof User;
+//       const first = String(a[col]);
+//       const second = String(b[col]);
+//       let cmp = first.localeCompare(second);
 
-export default ProductTableComponent;
+//       if (sortDescriptor.direction === "descending") {
+//         cmp *= -1;
+//       }
+
+//       return cmp;
+//     });
+//   }, [sortDescriptor]);
+
+//   return (
+//     <Table>
+//       <Table.ScrollContainer>
+//         <Table.Content
+//           aria-label="Table with custom cells"
+//           className="min-w-[800px]"
+//           selectedKeys={selectedKeys}
+//           selectionMode="multiple"
+//           sortDescriptor={sortDescriptor}
+//           onSelectionChange={setSelectedKeys}
+//           onSortChange={setSortDescriptor}
+//         >
+//           <Table.Header>
+//             <Table.Column className="pe-0">
+//               <Checkbox aria-label="Select all" slot="selection">
+//                 <Checkbox.Content>
+//                   <Checkbox.Control>
+//                     <Checkbox.Indicator />
+//                   </Checkbox.Control>
+//                 </Checkbox.Content>
+//               </Checkbox>
+//             </Table.Column>
+//             <Table.Column allowsSorting isRowHeader className="after:hidden" id="id">
+//               {({sortDirection}) => (
+//                 <Table.SortableColumnHeader sortDirection={sortDirection}>
+//                   Worker ID
+//                 </Table.SortableColumnHeader>
+//               )}
+//             </Table.Column>
+//             <Table.Column allowsSorting id="name">
+//               {({sortDirection}) => (
+//                 <Table.SortableColumnHeader sortDirection={sortDirection}>
+//                   Member
+//                 </Table.SortableColumnHeader>
+//               )}
+//             </Table.Column>
+//             <Table.Column allowsSorting id="role">
+//               {({sortDirection}) => (
+//                 <Table.SortableColumnHeader sortDirection={sortDirection}>
+//                   Role
+//                 </Table.SortableColumnHeader>
+//               )}
+//             </Table.Column>
+//             <Table.Column allowsSorting id="status">
+//               {({sortDirection}) => (
+//                 <Table.SortableColumnHeader sortDirection={sortDirection}>
+//                   Status
+//                 </Table.SortableColumnHeader>
+//               )}
+//             </Table.Column>
+//             <Table.Column className="text-end">Actions</Table.Column>
+//           </Table.Header>
+//           <Table.Body>
+//             {sortedUsers.map((user) => (
+//               <Table.Row key={user.id} id={user.id}>
+//                 <Table.Cell className="pe-0">
+//                   <Checkbox aria-label={`Select ${user.name}`} slot="selection" variant="secondary">
+//                     <Checkbox.Content>
+//                       <Checkbox.Control>
+//                         <Checkbox.Indicator />
+//                       </Checkbox.Control>
+//                     </Checkbox.Content>
+//                   </Checkbox>
+//                 </Table.Cell>
+//                 <Table.Cell className="font-medium">
+//                   <div className="flex items-center gap-2">
+//                     #{user.id.toString()}{" "}
+//                     <Button isIconOnly size="sm" variant="ghost">
+//                       <Icon className="size-4 text-muted" icon="gravity-ui:copy" />
+//                     </Button>
+//                   </div>
+//                 </Table.Cell>
+//                 <Table.Cell>
+//                   <div className="flex items-center gap-3">
+//                     <Avatar size="sm">
+//                       <Avatar.Image src={user.image_url} />
+//                       <Avatar.Fallback>
+//                         {user.name
+//                           .split(" ")
+//                           .map((n) => n[0])
+//                           .join("")}
+//                       </Avatar.Fallback>
+//                     </Avatar>
+//                     <div className="flex flex-col">
+//                       <span className="text-xs">{user.name}</span>
+//                       <span className="text-xs text-muted">{user.email}</span>
+//                     </div>
+//                   </div>
+//                 </Table.Cell>
+//                 <Table.Cell className="min-w-52">{user.role}</Table.Cell>
+//                 <Table.Cell className="min-w-25">
+//                   <Chip color={statusColorMap[user.status]} size="sm" variant="soft">
+//                     {user.status}
+//                   </Chip>
+//                 </Table.Cell>
+//                 <Table.Cell>
+//                   <div className="flex items-center gap-1">
+//                     <Button isIconOnly size="sm" variant="tertiary">
+//                       <Icon className="size-4" icon="gravity-ui:eye" />
+//                     </Button>
+//                     <Button isIconOnly size="sm" variant="tertiary">
+//                       <Icon className="size-4" icon="gravity-ui:pencil" />
+//                     </Button>
+//                     <Button isIconOnly size="sm" variant="danger-soft">
+//                       <Icon className="size-4" icon="gravity-ui:trash-bin" />
+//                     </Button>
+//                   </div>
+//                 </Table.Cell>
+//               </Table.Row>
+//             ))}
+//           </Table.Body>
+//         </Table.Content>
+//       </Table.ScrollContainer>
+//     </Table>
+//   );
+// }

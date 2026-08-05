@@ -1,9 +1,10 @@
 import { useForm } from "react-hook-form"
 import { useUserLoginMutation } from "../../services/authApi";
 import { useNavigate } from "react-router";
-import z from "zod";
+import {z} from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginComponent() {
   const [loginRequest] = useUserLoginMutation();
@@ -31,28 +32,23 @@ const {register, handleSubmit, watch, formState:{errors}} = useForm({
   }
 })
 
-
-  // custom login logic
-  const handleLoginSubmit = async(data) => {
-    try{
-      const result = await loginRequest({
-        userLoginRequest: data
-      });
-      if(result?.data?.accessToken){
-        toast.success("You have login successfully!")
-       setTimeout(()=> {
-         navigate("/",{replace: true})
-       },5000)
-      }else{
-        toast.error("Incorrect email or password!")
-      }
-    }catch(error){
-      console.log(error)
+ // custom login logic
+  const handleLoginSubmit = async (data) => {
+    const result = await loginRequest({ userLoginRequest: data });
+    if (result.error) {
+      console.log("Login failed:", result.error);
+      return;
     }
-  }
-}
-
-  return (
+    if (result.data?.accessToken) {
+      toast.success("You have login successfully!")
+      setTimeout(() => {
+        navigate("/user/user-signup", { replace: true })
+      },5000)
+    }else{
+      toast.error("Incorrect email or password!")
+    }
+  };
+    return (
     <section className="bg-gray-100 min-h-screen flex box-border justify-center items-center">
       <ToastContainer/>
   <div className=" rounded-2xl flex max-w-3xl p-5 items-center">
@@ -72,8 +68,8 @@ const {register, handleSubmit, watch, formState:{errors}} = useForm({
           {...register("email")}
         />
         {/* validation input form from react hook form */}
-        {/* <p className="text-red-500">{errors?.email && errors.email.message}</p> */}
-        {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+        <p className="text-red-500">{errors?.email && errors.email.message}</p>
+        {/* {errors.email && <p className="text-red-500">{errors.email.message}</p>} */}
 
 
         <div className="relative">
@@ -172,3 +168,4 @@ const {register, handleSubmit, watch, formState:{errors}} = useForm({
 </section>
 
   )
+}
