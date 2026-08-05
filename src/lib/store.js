@@ -1,18 +1,18 @@
-import { configureStore } from '@reduxjs/toolkit'
-import { CounterSlice } from '../features/counter/CounterSlice'
-import { CartSlice } from '../features/cart/CartSlice'
-import { ecommerceApi } from '../services/ecommerceApi'
+import { configureStore } from "@reduxjs/toolkit";
+import { CounterSlice } from "../features/counter/CounterSlice";
+import { CartSlice } from "../features/cart/CartSlice";
+import { baseApi } from "../services/baseApi";
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       [CounterSlice.name]: CounterSlice.reducer,
       [CartSlice.name]: CartSlice.reducer,
-      [ecommerceApi.reducerPath]: ecommerceApi.reducer
+      [baseApi.reducerPath]: baseApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(ecommerceApi.middleware)
-  })
-}
+      getDefaultMiddleware().concat(baseApi.middleware),
+  });
+};
 
-export const store = makeStore()
+export const store = makeStore();

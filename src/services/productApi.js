@@ -1,32 +1,27 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import { baseApi } from "./baseApi";
 
-export const ecommerceApi = createApi({
-  reducerPath: "ecommerceApi",
 
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BASE_ISHOP_URL,
-  }),
-
+export const productApi = baseApi.injectEndpoints({
+  
   endpoints: (builder) => ({
+ 
     // Get all products
     getAllProducts: builder.query({
       query: () => "/products",
-      transformResponse: (response) => response?.content ?? [],
+      
     }),
 
     // Get product by UUID
     getProductByUuid: builder.query({
       query: (uuid) => `/products/${uuid}`,
     }),
-
+    // create, update, delete (mutation)
     // Add product
     addNewProduct: builder.mutation({
-      query: ({ createProduct, accessToken }) => ({
-        url: "/products",
+      query: ({ createProduct}) => ({
         method: "POST",
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        url: "/products",        
         body: createProduct,
       }),
     }),
@@ -34,11 +29,8 @@ export const ecommerceApi = createApi({
     // Update product
     updateProductByUUID: builder.mutation({
       query: ({ uuid, updateProduct, accessToken }) => ({
-        url: `/products/${uuid}`,
         method: "PUT",
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        url: `/products/${uuid}`,
         body: updateProduct,
       }),
     }),
@@ -46,11 +38,8 @@ export const ecommerceApi = createApi({
     // Delete product
     deleteProductByUUID: builder.mutation({
       query: ({ uuid, accessToken }) => ({
-        url: `/products/${uuid}`,
         method: "DELETE",
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        url: `/products/${uuid}`,
       }),
     }),
   }),
@@ -62,4 +51,4 @@ export const {
   useAddNewProductMutation,
   useUpdateProductByUUIDMutation,
   useDeleteProductByUUIDMutation,
-} = ecommerceApi;
+} = baseApi;

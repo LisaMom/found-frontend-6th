@@ -3,7 +3,7 @@ import "./App.css";
 import { Suspense, lazy } from "react";
 import LoadingComponent from "./components/LoadingComponent";
 import { Link } from "react-router";
-import { useGetAllProductsQuery } from "./services/ecommerceApi";
+import { useGetAllProductsQuery } from "./services/productApi";
 
 function App() {
   // const [products, setProducts] = useState([]);
@@ -21,7 +21,7 @@ function App() {
   // }, []);
 
   // calling get all products hook
-  const {data:products, isLoading, error} = useGetAllProductsQuery();
+  const {data, isLoading, error} = useGetAllProductsQuery([]);
 
   const ProductComponent = lazy(
     () => import("./components/products/ProductComponent"),
@@ -38,7 +38,7 @@ function App() {
         <Suspense fallback={<LoadingComponent />}>
           {isLoading && <LoadingComponent />}
           {error && <p>Failed to load products.</p>}
-          {(products ?? []).map(({ uuid, name, priceOut, thumbnail, category }) => (
+          {data?.content.map(({ uuid, name, priceOut, thumbnail, category }) => (
             <Link  key={uuid} to={`/product/${uuid}`}>
               <ProductComponent
                 title={name}
