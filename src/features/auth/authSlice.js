@@ -17,6 +17,7 @@ export const authSlice = createSlice({
     setLogout: (state) => {
       state.accessToken = "";
       state.refreshToken = "";
+      sessionStorage.removeItem('refreshToken');
     },
   },
 });

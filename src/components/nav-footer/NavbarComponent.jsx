@@ -7,6 +7,10 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useAppSelector } from "../../lib/hook";
+import { useUserProfileQuery } from "../../services/profileApi";
+import { setLogout } from "../../features/auth/authSlice";
+import { ToastActionButton } from "@heroui/react";
+import { ToastContainer } from "react-toastify";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", current: true },
@@ -21,11 +25,23 @@ function classNames(...classes) {
 export default function NavbarComponent() {
   const isLogined = false;
   const count = useAppSelector((state) => state.cart.totalItems)
+  
+  const {data:userProfileData, isSuccess} = useUserProfileQuery();
+  const dispatch = userAppDispatch();
+  const sessionToken = useAppSelector((state)=>state.auth.refreshToken);
+  const navigate = useNavigate();
+if(sessionToken == null){
+  toast.success("Logout Successfully!")
+  navigate('/')
+}
+
+
   return (
     <Disclosure as="nav" className="relative bg-gray-800">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+            <ToastContainer/>
             {/* Mobile menu button*/}
             <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white focus:outline-2 focus:-outline-offset-1 focus:outline-indigo-500">
               <span className="absolute -inset-0.5" />
@@ -95,7 +111,7 @@ export default function NavbarComponent() {
                 {isLogined ? (
                   <img
                     alt=""
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    src={userProfileData?.profile}
                     className="size-8 rounded-full bg-gray-800 outline -outline-offset-1 outline-white/10"
                   />
                 ) : (
@@ -108,7 +124,7 @@ export default function NavbarComponent() {
                 )}
               </MenuButton>
 
-              {/* <MenuItems
+              <MenuItems
                 transition
                 className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg outline outline-black/5 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
               >
@@ -131,12 +147,13 @@ export default function NavbarComponent() {
                 <MenuItem>
                   <a
                     href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                    className="block px-4 py-2 text-sm text-red-700 data-focus:bg-gray-100 data-focus:outline-hidden"
+                    onClick={()=> dispatch(setLogout(null))}
                   >
                     Sign out
                   </a>
                 </MenuItem>
-              </MenuItems> */}
+              </MenuItems>
             </Menu>
           </div>
         </div>

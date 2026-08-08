@@ -7,13 +7,22 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import auth  from "../firebase/config";
+import { useUserLoginMutation, useUserRegisterMutation } from "../../services/authApi";
 
 export default function GoogleLoginComponent() {
   const [error, setError] = useState(null);
   const [pending, setIsPending] = useState(false);
   const [user, setUser] = useState(null);
+  // create provider 
+  const provider = new GoogleAuthProvider();
+  provider.addScope('email');
+
+  const [userOauthRegister,{data:userData}] = useUserRegisterMutation();
+  cosnt [userOauthLogin] = useUserLoginMutation();
 
   const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -36,6 +45,37 @@ export default function GoogleLoginComponent() {
       }
       console.log("Google Info: ", res.user);
       navigate("/"); // redirect after successful login
+
+// logic implement with api
+if (user?.email != null) {
+  const result = useOauthRegister({
+    userRegisterRequest: {
+      username: user.providerData[0]?.displayName.slice(0,5),
+      phoneNumber: user.providerData[0]?.phoneNumber,
+      address: {
+        addressLine1: "string",
+        addressLine2: "string",
+        road: "string",
+        linkAddress: "string",
+      },
+      email: user.providerData[0]?.email,
+      password: `${user.providerData[0]?.displayName}168$$`,
+      confirmPassword: `${user.providerData[0].displayName.slice(0,5)}168$$`,
+      profile: user.providerData[0].photoURL,
+    }
+  });
+  cconsole.log('===> UserData: ', result)
+result
+.then((data) => data.json())
+.then((data) => {
+  useUserOauthLogin({
+    userLoginRequest: {
+      email: user.providerData[0].email,
+      password: `${user.providerData[0].displayName}168$$`
+    }
+  })
+});
+}
     } catch (err) {
       setError(err);
       console.log(err.message);
