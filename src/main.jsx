@@ -14,6 +14,7 @@ import LoginComponent from "./components/auth/LoginComponent.jsx";
 import RegisterComponent from "./components/auth/RegisterComponent.jsx";
 import { Provider } from "react-redux";
 import { store } from "./lib/store";
+import ProductTableComponet from "./components/table/ProductTableComponent.jsx"
 
 const router = createBrowserRouter([
   // dashboardlayout
@@ -22,8 +23,8 @@ const router = createBrowserRouter([
     element: <DasboardLayout />,
     children: [
       {
-        path: "/dashboard/table-data",
-        element: <h1>Table Data</h1>,
+        path: "/dashboard",
+        element: <ProductTableComponet/>,
       },
       {
         path: "/dashboard/users",

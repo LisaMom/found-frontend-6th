@@ -3,6 +3,8 @@ import { useNavigate } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUserRegisterMutation } from "../../services/authApi";
+import  GoogleLoginComponent  from "../oauth/GoogleComponent";
+import  GithubLoginComponent  from "../oauth/GithubComponent";
 
 // Fixed values matching the teacher's example — not collected from the user
 const FIXED_ADDRESS = {
@@ -143,16 +145,20 @@ export default function RegisterComponent() {
               Sign up
             </button>
           </form>
+          {/* btn google login */}
+          <GoogleLoginComponent />
+          {/* btn github login */}
+          <GithubLoginComponent />
 
 
-          <button className="w-full mt-4 border border-gray-300 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition">
+          {/* <button className="w-full mt-4 border border-gray-300 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition">
             <img
               src="https://www.svgrepo.com/show/355037/google.svg"
               alt="Google"
               className="w-5 h-5 mr-2"
             />
             Register with Google
-          </button>
+          </button> */}
           <p className="mt-6 text-sm text-center text-gray-600">
             Already have an account?
             <a href="/auth/login" className="text-blue-600 hover:underline">

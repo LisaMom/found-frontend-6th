@@ -5,12 +5,16 @@ import { baseApi } from "./baseApi";
 export const productApi = baseApi.injectEndpoints({
   
   endpoints: (builder) => ({
+    // crud
+        getAllProducts: builder.query({
+            query: ({ page = 0, size = 12 } = {}) => `/products?page=${page}&size=${size}`
+        }),
  
     // Get all products
-    getAllProducts: builder.query({
-      query: () => "/products",
+    // getAllProducts: builder.query({
+    //   query: () => "/products",
       
-    }),
+    // }),
 
     // Get product by UUID
     getProductByUuid: builder.query({
