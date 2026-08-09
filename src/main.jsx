@@ -6,25 +6,27 @@ import { RouterProvider } from "react-router/dom";
 import About from "./pages/About.jsx";
 import Product from "./pages/Product.jsx";
 import Contact from "./pages/Contact.jsx";
+import Profile from "./pages/Profile.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import DasboardLayout from "./layout/DasboardLayout.jsx";
 import Layout from "./Layout.jsx";
 import AuthLayout from "./layout/AuthLayout.jsx";
 import LoginComponent from "./components/auth/LoginComponent.jsx";
 import RegisterComponent from "./components/auth/RegisterComponent.jsx";
+import AuthProvider from "./components/auth/AuthProvider.jsx";
 import { Provider } from "react-redux";
 import { store } from "./lib/store";
-import ProductTableComponet from "./components/table/ProductTableComponent.jsx"
+import ProductTableComponet from "./components/table/ProductTableComponent.jsx";
 
 const router = createBrowserRouter([
-  // dashboardlayout
+  // dashboard layout
   {
     path: "/dashboard",
     element: <DasboardLayout />,
     children: [
       {
         path: "/dashboard",
-        element: <ProductTableComponet/>,
+        element: <ProductTableComponet />,
       },
       {
         path: "/dashboard/users",
@@ -38,15 +40,19 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-         path: "/",
-         element: <App/>,
+        path: "/",
+        element: <App />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />,
       },
       {
         path: "/about",
         element: <About />,
       },
       {
-        path: "/product/:uuid", //dynamic segment of product (uuid)
+        path: "/product/:uuid",
         element: <Product />,
       },
       {
@@ -57,18 +63,18 @@ const router = createBrowserRouter([
   },
   // auth layout (register, login)
   {
-    path: '/auth',
-    element: <AuthLayout/>,
+    path: "/auth",
+    element: <AuthLayout />,
     children: [
       {
-        path: '/auth/login',
-        element: <LoginComponent/>
+        path: "/auth/login",
+        element: <LoginComponent />,
       },
       {
-        path: '/auth/register',
-        element: <RegisterComponent/>
-      }
-    ]
+        path: "/auth/register",
+        element: <RegisterComponent />,
+      },
+    ],
   },
   {
     // custom not found page
@@ -81,6 +87,8 @@ const root = document.getElementById("root");
 
 ReactDOM.createRoot(root).render(
   <Provider store={store}>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </Provider>
 );

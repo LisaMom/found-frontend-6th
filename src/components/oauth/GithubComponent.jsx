@@ -1,61 +1,33 @@
-import { useEffect, useState } from "react";
+import { signInWithPopup } from "firebase/auth";
+import { useState } from "react";
 import { useNavigate } from "react-router";
-import auth from "../firebase/config";
-import {
-  GithubAuthProvider,
-  onAuthStateChanged,
-  signInWithPopup,
-  signOut,
-} from "firebase/auth";
+import { toast } from "react-toastify";
+import { auth, githubProvider } from "../firebase/config";
+import { saveUserToFirestore } from "../../services/userService";
 
 export default function GithubLoginComponent() {
-  const [error, setError] = useState(null);
   const [pending, setIsPending] = useState(false);
-  const [user, setUser] = useState(null);
-
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const provider = new GithubAuthProvider();
-    provider.addScope("user:email");
-
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // will be null on logout — that's expected, not an error
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const loginWithGithub = async () => {
     setIsPending(true);
-    setError(null);
     try {
-      const provider = new GithubAuthProvider();
-      provider.addScope("user:email");
-
-      const res = await signInWithPopup(auth, provider);
-      if (!res) {
-        throw new Error("Login unsuccessful");
+      const res = await signInWithPopup(auth, githubProvider);
+      if (!res?.user) {
+        throw new Error("GitHub login failed");
       }
-      console.log("GitHub Info: ", res.user);
-      navigate("/"); // redirect after successful login
-    } catch (err) {
-      setError(err);
-      console.log(err.message);
-    } finally {
-      setIsPending(false);
-    }
-  };
 
-  const githubLogout = async () => {
-    setIsPending(true);
-    setError(null);
-    try {
-      await signOut(auth);
-      console.log("Logout successful!");
+      await saveUserToFirestore(res.user, {
+        authProvider: "github",
+        displayName: res.user.displayName,
+        photoURL: res.user.photoURL,
+      });
+
+      toast.success(`Welcome, ${res.user.displayName || "GitHub User"}!`);
+      navigate("/");
     } catch (err) {
-      setError(err);
-      console.log(err.message);
+      console.error("GitHub Auth error:", err);
+      toast.error(err.message || "GitHub authentication failed");
     } finally {
       setIsPending(false);
     }
@@ -63,16 +35,17 @@ export default function GithubLoginComponent() {
 
   return (
     <button
-      className="w-full mt-4 border border-gray-300 py-2 rounded-lg flex items-center justify-center hover:bg-gray-100 transition"
-      onClick={user ? githubLogout : loginWithGithub}
+      type="button"
+      className="w-full mt-3 border border-gray-300 py-2.5 px-4 rounded-xl flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-700 font-medium shadow-sm transition hover:scale-[1.01] cursor-pointer"
+      onClick={loginWithGithub}
       disabled={pending}
     >
       <img
         src="https://www.svgrepo.com/show/512317/github-142.svg"
-        alt="github"
-        className="w-5 h-5 mr-2"
+        alt="GitHub"
+        className="w-5 h-5"
       />
-      {pending ? "Please wait..." : user ? "Logout" : "Register with GitHub"}
+      <span>{pending ? "Connecting..." : "Continue with GitHub"}</span>
     </button>
   );
 }
