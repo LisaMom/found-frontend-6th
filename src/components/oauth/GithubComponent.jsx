@@ -27,7 +27,11 @@ export default function GithubLoginComponent() {
       navigate("/");
     } catch (err) {
       console.error("GitHub Auth error:", err);
-      toast.error(err.message || "GitHub authentication failed");
+      let errorMsg = err.message || "GitHub authentication failed";
+      if (err.code === "auth/unauthorized-domain") {
+        errorMsg = `Domain '${window.location.hostname}' is not authorized. Please add '${window.location.hostname}' to Firebase Console -> Authentication -> Settings -> Authorized domains.`;
+      }
+      toast.error(errorMsg, { autoClose: 7000 });
     } finally {
       setIsPending(false);
     }
